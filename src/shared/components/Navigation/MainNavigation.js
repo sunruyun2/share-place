@@ -14,6 +14,10 @@ const MainNavigation = props => {
         setDrawerIsOpen(true);
     }
 
+    const closeDrawer = () =>{
+        setDrawerIsOpen(false)
+    }
+
     return (<>
     {drawerIsOpen &&  
         (<SideDrawer>
