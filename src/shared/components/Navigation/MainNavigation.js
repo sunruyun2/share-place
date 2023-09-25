@@ -5,6 +5,7 @@ import MainHeader from "./MainHeader";
 import './MainNavigation.css'
 import SideDrawer from "./SideDrawer";
 import NavLinks from './NavLinks'
+import Backdrop from "../UIElements/Backdrop";
 
 
 const MainNavigation = props => {
@@ -19,6 +20,7 @@ const MainNavigation = props => {
     }
 
     return (<>
+    {drawerIsOpen && <Backdrop onClick={closeDrawer}/>}
     {drawerIsOpen &&  
         (<SideDrawer>
             <nav className="main-navigation__drawer-nav">
