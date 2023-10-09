@@ -18,7 +18,7 @@ const formReducer = (state, action) => {
             }
             return {
                 ...state,
-                input: {
+                inputs: {
                     ...state.inputs,
                     [action.inputId] : {value: action.value , isValid: action.isValid}
                 },
@@ -54,11 +54,15 @@ const NewPlace = () => {
         })
     }, [])
 
+    const placeSubmitHandler = event => {
+        event.preventDefault();
+        console.log(formState.inputs); //send this to a back-end later
+    }
+
     
-    return <form className="place-form">
+    return <form className="place-form" onSubmit={placeSubmitHandler}>
         <Input
             id="title" 
-            type="text"
             label="Title"
             element="input"
             validators={[VALIDATOR_REQUIRE()]}
@@ -67,14 +71,22 @@ const NewPlace = () => {
 
         <Input
             id = "description" 
-            type="text"
             label="Description"
-            element="input"
+            element="textarea"
             validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(5)]}
             errorText="please enter a valid description (at least 5 character)"
             onInput = {InputHandler} />
 
-        <Button type="submit" disable={!formState.isValid}>
+        <Input
+            id = "address" 
+            label="Address"
+            element="input"
+            validators={[VALIDATOR_REQUIRE()]}
+            errorText="please enter a valid address"
+            onInput = {InputHandler} />    
+            
+
+        <Button type="submit" disabled={!formState.isValid}>
             ADD PLACE
         </Button>
     </form>
