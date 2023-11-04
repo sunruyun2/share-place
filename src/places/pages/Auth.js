@@ -43,7 +43,7 @@ const Auth = () =>{
                     body: JSON.stringify({
                         name:formState.inputs.name.value,
                         email:formState.inputs.email.value,
-                        password:formState.inputs.email.password,
+                        password:formState.inputs.password.value,
                     })
                 });
 
