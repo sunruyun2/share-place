@@ -7,13 +7,15 @@ import Button from "../../shared/components/FormElements/Button";
 import { VALIDATOR_EMAIL, VALIDATOR_MINLENGTH, VALIDATOR_REQUIRE } from "../../shared/util/validators";
 import { useForm } from "../../shared/hooks/form-hooks";
 import { AuthContext } from "../../shared/context/auth-context";
-
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 
 const Auth = () =>{
     const auth = useContext(AuthContext)
-
     const [isLoginMode, setIsLoginMode] = useState(true)
-    
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState()
+
     const [formState, inputHandler, setFormData] = useForm({
         email: {
             value: '',
@@ -35,6 +37,7 @@ const Auth = () =>{
 
         } else {
             try {
+                setIsLoading(true);
                 const response = await fetch('http://localhost:5000/api/users/signup', {
                     method: 'POST',
                     headers: {
@@ -49,11 +52,14 @@ const Auth = () =>{
 
                 const responseData = await response.json();
                 console.log(responseData)
+                setIsLoading(false)
+                auth.login();
             } catch (e) {
                 console.log(e)
+                setIsLoading(false)
+                setError(e.message || 'Something went wrong, please try again')
             }
         }
-        auth.login();
     }
 
     const switchModeHandler = () => {
@@ -75,6 +81,7 @@ const Auth = () =>{
     }
 
     return <Card className="authentication">
+        {isLoading && <LoadingSpinner asOverlay/>}
         <h2>Login Required</h2>
         <form onSubmit={authSubmitHandler}>
             {!isLoginMode && (
