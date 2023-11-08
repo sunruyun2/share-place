@@ -18,17 +18,21 @@ export const useHttpClient = () => {
                 signal: httpAbortCtrll.signal
             })
     
-            const responseData = await response.jason();
+            const responseData = await response.json();
+
+            activeHttpRequests.current = activeHttpRequests.current.filter(reqCtrl => reqCtrl !==httpAbortCtrll);
+
             if(!response.ok){
                 throw new Error(responseData.message)
             }
-
+            setIsLoading(false)
             return responseData
         } catch (e) {
             setError(e.message)
+            setIsLoading(false)
+            throw e;
         }
         
-        setIsLoading(false)
     }, [])
 
     const clearError = () => {
