@@ -1,5 +1,5 @@
 /* allow user to update the title or description of a place */
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { useParams } from 'react-router-dom'
 
 import Input from '../../shared/components/FormElements/Input'
@@ -11,41 +11,16 @@ import Card from "../../shared/components/UIElements/Card";
 import { useHttpClient } from "../../shared/hooks/http-hooks";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
-
-const DUMMY_PLACES = [
-    {
-        id:'p1',
-        title:'Empire State Building',
-        description: 'One of the greatest sky scrapers in the world!',
-        imageUrl: 'https://images.pexels.com/photos/2019546/pexels-photo-2019546.jpeg',
-        address: '20 W 34th St., New York, NY 10001, United States',
-        location: {
-            lat:40.7484445,
-            lng:-73.9882393,
-        },
-        creator: 'u1'
-    },
-    {
-        id:'p2',
-        title:'Emp.',
-        description: 'One of the greatest sky scrapers in the world!',
-        imageUrl: 'https://images.pexels.com/photos/2019546/pexels-photo-2019546.jpeg',
-        address: '20 W 34th St., New York, NY 10001, United States',
-        location: {
-            lat:40.7484445,
-            lng:-73.9882393,
-        },
-        creator: 'u2',
-    },
-]
-
+import { AuthContext } from "../../shared/context/auth-context";
+import { useHistory } from "react-router-dom/cjs/react-router-dom";
 
 
 const UpdatePlace = () => {
     const { isLoading, error, sendRequest, clearError} = useHttpClient();
     const [loadedPlace, setLoadedPlace] = useState();
-
+    const history = useHistory();
     const placeId = useParams().placeId;
+    const auth = useContext(AuthContext);
 
     const [formState, inputHandler, setFormData] = useForm( {
         title: {
@@ -100,9 +75,24 @@ const UpdatePlace = () => {
                 )
         }
 
-    const placeUpdateSubmitHandler = event => {
+    const placeUpdateSubmitHandler = async event => {
         event.preventDefault();
-        console.log(formState)
+        try {
+            await sendRequest(
+                `http://localhost:5000/api/places/${placeId}`,
+                'PATCH',
+                JSON.stringify({
+                    title: formState.inputs.title.value,
+                    description: formState.inputs.description.value,
+                }),
+                {'Content-Type': 'application/json'}
+            )
+            
+        } catch (error) {
+            console.log(error)
+        }
+
+        history.push('/' + auth.userId + '/places')
     }
 
 
