@@ -8,6 +8,9 @@ import Button from "../../shared/components/FormElements/Button";
 import './PlaceForm.css'
 import { useForm } from "../../shared/hooks/form-hooks";
 import Card from "../../shared/components/UIElements/Card";
+import { useHttpClient } from "../../shared/hooks/http-hooks";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 
 const DUMMY_PLACES = [
     {
@@ -39,7 +42,8 @@ const DUMMY_PLACES = [
 
 
 const UpdatePlace = () => {
-    const [isLoading, setIsLoading] = useState(true);
+    const { isLoading, error, sendRequest, clearError} = useHttpClient();
+    const [loadedPlace, setLoadedPlace] = useState();
 
     const placeId = useParams().placeId;
 
@@ -54,29 +58,31 @@ const UpdatePlace = () => {
         }
     } , true)
 
-
-
-    // adjust the form-hook initialization so that to solve the problem that
-    // the data is fetched after the component is rendered
-    const identifiedPlace = DUMMY_PLACES.find(p => p.id === placeId)
-
     useEffect(()=>{
-        if (identifiedPlace){
-            setFormData({
-                title: {
-                    value: identifiedPlace.title,
-                    isValid: true
-                },
-                description: {
-                    value: identifiedPlace.description,
-                    isValid: true
-                }
-            }, true)
-            setIsLoading(false)
+        const fetchPlace = async() => {
+            try {
+                const responseData = await sendRequest(
+                    `http://localhost:5000/api/places/${placeId}`
+                );
+                setLoadedPlace(responseData.place)
+                setFormData({
+                    title: {
+                        value: responseData.place.title,
+                        isValid: true
+                    },
+                    description: {
+                        value: responseData.place.description,
+                        isValid: true
+                    }
+                }, true)
+            } catch (error) {}
         }
-    },[setFormData, identifiedPlace])
+        fetchPlace();
+    } ,[sendRequest,placeId,setFormData])
 
-    if (!identifiedPlace) {
+
+
+    if (!loadedPlace &&!error) {
         return (
         <div className="center">
             <Card>
@@ -86,21 +92,23 @@ const UpdatePlace = () => {
         )
     }
 
+        if (isLoading) {
+            return (
+                <div className="center">
+                    <LoadingSpinner />
+                </div>
+                )
+        }
+
     const placeUpdateSubmitHandler = event => {
         event.preventDefault();
         console.log(formState)
     }
 
-    //fix the problem here later by replacing it with a real loading state
-    if (isLoading) {
-        return (
-            <div className="center">
-                <h2>LOADING...</h2>
-            </div>
-            )
-    }
+
     
-    return (
+    return (<>
+        <ErrorModal error={error} onClear={clearError}/>
         <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
         <Input 
             id="title" 
@@ -128,7 +136,7 @@ const UpdatePlace = () => {
         <Button type="submit" disabled= {!formState.isValid}>
             UPDATE PLACE
         </Button>
-    </form>)
+    </form></>)
     
 };
 
