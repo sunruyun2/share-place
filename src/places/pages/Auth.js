@@ -33,6 +33,8 @@ const Auth = () => {
     
     const authSubmitHandler = async event => {
         event.preventDefault();
+
+        console.log(formState.inputs)
         
         //send http request to backend
         if (isLoginMode) {
@@ -76,13 +78,18 @@ const Auth = () => {
         if (!isLoginMode) {
             setFormData({
                 ...formState.inputs,
-                name: undefined
+                name: undefined,
+                image: undefined
             }, formState.inputs.email.isValid && formState.inputs.password.isValid)
         } else {
             setFormData({
                 ...formState.inputs,
                 name: {
                     value: '',
+                    isValid: false
+                },
+                image: {
+                    value: null,
                     isValid: false
                 }
             }, false)
@@ -108,7 +115,7 @@ const Auth = () => {
                             onInput={inputHandler}
                         />
                     )}
-                    {!isLoginMode && <ImageUpload center id="image"/>}
+                    {!isLoginMode && <ImageUpload center id="image" onInput={inputHandler}/>}
                     <Input
                         id="email"
                         element="input"
